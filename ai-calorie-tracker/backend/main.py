@@ -21,7 +21,10 @@ app = FastAPI(title="AI Calorie Tracker API")
 # The Vite dev server runs on 5173 by default.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+    "http://localhost:5173",
+    "https://ai-calorie-tracker-six-pi.vercel.app",
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
