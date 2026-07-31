@@ -85,6 +85,7 @@ This repository includes `render.yaml`. Create a Render Blueprint from the
 repository, then set `GEMINI_API_KEY` in the service environment. Set
 `FRONTEND_ORIGINS` to the comma-separated URLs of your frontend deployments
 (for example, `https://my-app.vercel.app,http://localhost:5173`).
+Optionally set `GEMINI_MODEL=gemini-3.6-flash` (the default).
 
 For a deployed frontend, set `VITE_API_BASE_URL` to the Render service URL
 followed by `/api`, then rebuild and redeploy the frontend. The API health
