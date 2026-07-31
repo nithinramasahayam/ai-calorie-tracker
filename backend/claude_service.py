@@ -16,4 +16,9 @@ Food: {description}"""
     if txt.startswith("```"):
         txt="\n".join(txt.splitlines()[1:-1])
     data=json.loads(txt)
+    required_fields = {
+        "food_items", "calories", "protein_g", "carbs_g", "fat_g", "confidence"
+    }
+    if not isinstance(data, dict) or not required_fields.issubset(data):
+        raise ValueError("Gemini returned an incomplete nutrition estimate.")
     return data

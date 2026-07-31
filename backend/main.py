@@ -1,4 +1,5 @@
 from datetime import date as date_type
+import logging
 import os
 from typing import List, Optional
 
@@ -14,6 +15,8 @@ import models
 import schemas
 from claude_service import analyze_food
 from database import engine, get_db
+
+logger = logging.getLogger(__name__)
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -46,9 +49,14 @@ def create_entry(payload: schemas.FoodEntryCreate, db: Session = Depends(get_db)
     """Analyze a food description with Gemini, then persist the result."""
     try:
         nutrition = analyze_food(payload.description)
-    except RuntimeError as exc:
-        # Missing API key or a malformed model response -> 502, not a 500 crash.
-        raise HTTPException(status_code=502, detail=str(exc))
+    except Exception:
+        # Gemini API failures and invalid model output must not crash the ASGI
+        # request. The full exception remains available in the Render logs.
+        logger.exception("Food analysis failed")
+        raise HTTPException(
+            status_code=502,
+            detail="Food analysis failed. Check that GEMINI_API_KEY is valid and retry.",
+        )
 
     entry = models.FoodEntry(
         description=payload.description,
