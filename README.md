@@ -1,14 +1,14 @@
 # AI Calorie Tracker
 
 Log meals in plain English ("two eggs, toast, black coffee") and get an
-instant nutrition estimate, powered by Claude. Full-stack app: React
+instant nutrition estimate, powered by Gemini. Full-stack app: React
 frontend, FastAPI backend, SQLite storage.
 
 ## How it works
 
 1. You type a free-text food description into the form.
 2. The frontend `POST`s it to the FastAPI backend.
-3. The backend calls the Claude API with a **tool definition** describing
+3. The backend calls the Gemini API for a structured nutrition estimate
    exactly the nutrition fields we need (calories, protein, carbs, fat,
    per-item portions, a confidence level, and any assumptions made). Forcing
    `tool_choice` to that tool means Claude's reply is always structured
@@ -30,7 +30,7 @@ backend/
   main.py            FastAPI app + routes
   models.py           SQLAlchemy ORM model (FoodEntry)
   schemas.py          Pydantic request/response schemas
-  claude_service.py   Claude API call + tool schema
+  claude_service.py   Gemini API call
   database.py         SQLite engine/session
   requirements.txt
   .env.example
@@ -58,8 +58,7 @@ source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# then edit .env and set ANTHROPIC_API_KEY=sk-ant-...
-# get a key at https://console.anthropic.com/settings/keys
+# then edit .env and set GEMINI_API_KEY=...
 
 uvicorn main:app --reload --port 8000
 ```
@@ -80,11 +79,23 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+### Deploying the backend to Render
+
+This repository includes `render.yaml`. Create a Render Blueprint from the
+repository, then set `GEMINI_API_KEY` in the service environment. Set
+`FRONTEND_ORIGINS` to the comma-separated URLs of your frontend deployments
+(for example, `https://my-app.vercel.app,http://localhost:5173`).
+
+For a deployed frontend, set `VITE_API_BASE_URL` to the Render service URL
+followed by `/api`, then rebuild and redeploy the frontend. The API health
+check at `/api/health` must return `{"status":"ok"}` before the frontend can
+connect.
+
 ## API reference
 
 | Method | Path                    | Description                              |
 |--------|-------------------------|-------------------------------------------|
-| POST   | `/api/entries`          | Analyze a description with Claude, save it |
+| POST   | `/api/entries`          | Analyze a description with Gemini, save it |
 | GET    | `/api/entries?date=`    | List entries for a date                    |
 | DELETE | `/api/entries/{id}`     | Remove an entry                            |
 | GET    | `/api/summary?date=`    | Daily totals (calories, protein, carbs, fat) |

@@ -1,9 +1,10 @@
 from datetime import date as date_type
+import os
 from typing import List, Optional
 
 from dotenv import load_dotenv
 
-load_dotenv()  # must run before claude_service reads ANTHROPIC_API_KEY
+load_dotenv()  # must run before claude_service reads GEMINI_API_KEY
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,11 +19,18 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="AI Calorie Tracker API")
 
-# The Vite dev server runs on 5173 by default.
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
+    # The API has no cookie authentication, so this fallback can safely serve
+    # public browser clients until explicit production origins are configured.
+    allow_origins=allowed_origins or ["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -35,7 +43,7 @@ def health():
 
 @app.post("/api/entries", response_model=schemas.FoodEntryOut)
 def create_entry(payload: schemas.FoodEntryCreate, db: Session = Depends(get_db)):
-    """Analyze a food description with Claude, then persist the result."""
+    """Analyze a food description with Gemini, then persist the result."""
     try:
         nutrition = analyze_food(payload.description)
     except RuntimeError as exc:

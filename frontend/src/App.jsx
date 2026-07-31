@@ -97,7 +97,7 @@ export default function App() {
 
         {loadError && (
           <p className="form-error">
-            Couldn't reach the backend: {loadError}. Is it running on port 8000?
+            Couldn't reach the backend: {loadError}. Check that the API service is running.
           </p>
         )}
 

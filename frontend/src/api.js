@@ -1,4 +1,7 @@
-const BASE_URL = "https://ai-calorie-backend-h20o.onrender.com/api";
+const BASE_URL = (
+  import.meta.env.VITE_API_BASE_URL ||
+  "https://ai-calorie-backend-h20o.onrender.com/api"
+).replace(/\/$/, "");
 
 async function handle(res) {
   if (!res.ok) {
